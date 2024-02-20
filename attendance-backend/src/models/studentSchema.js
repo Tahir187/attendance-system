@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const studentSchema = new mongoose.Schema({
-    name: {
+    username: {
         type: String,
         required: true,
     },
@@ -34,6 +34,11 @@ const studentSchema = new mongoose.Schema({
             enum: ['Present', 'Absent', 'Leave'],
             required: true,
         },
+        subName: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'subject',
+            required: true
+        }
     }]
 });
 
