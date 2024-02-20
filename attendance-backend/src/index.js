@@ -1,11 +1,16 @@
 const express = require('express')
+require('dotenv').config();
+
+// db connection
+require('./config/db');
+
 const app = express()
-const port = 3000
 
 app.get('/', (req, res) => {
   res.send('Hello World two!')
 })
 
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
+const PORT = process.env.PORT || 4000;
+app.listen(PORT, () => {
+    console.log(`Server is listening on port ${PORT}`)
 })
