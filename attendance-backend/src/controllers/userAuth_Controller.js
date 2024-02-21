@@ -3,7 +3,7 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const Attendance = require("../models/attendanceSchema");
 
-const userauthController = {
+const userAuthController = {
   login: async (req, res) => {
     const { email, password } = req.body;
 
@@ -158,7 +158,7 @@ const userauthController = {
         );
         res.status(200).json({
           message: "User data updated successfully",
-          user: updatedUser,
+          user: updateUser,
         });
       } else {
         return res
@@ -171,4 +171,4 @@ const userauthController = {
   },
 };
 
-module.exports = userauthController;
+module.exports = userAuthController;

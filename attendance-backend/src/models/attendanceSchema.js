@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const attendanceSchema = new mongoose.Schema(
   {
     date: {
-      type: date,
+      type: Date,
       default: Date.now(),
       unique: true,
     },
@@ -32,6 +32,6 @@ const attendanceSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const Attendance = mongoose.model("attendance", attendanceSchema);
+const Attendance = mongoose.model("Attendance", attendanceSchema);
 
-module.exports = Attendance;
+module.exports = Attendance; 
