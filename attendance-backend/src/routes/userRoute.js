@@ -4,9 +4,10 @@ const router = express.Router();
 const userController = require('../controllers/user_Controller');
 
 // Define routes for markPresent, submitLeaveRequest, updateUser, and viewAttendance
-router.post('/mark-present', userController.markPresent);
-router.post('/submit-leave-request', userController.submitLeaveRequest);
-router.put('/update-user', userController.updateUser);
-router.get('/view-attendance', userController.viewAttendance);
+router.post('/markPresent', userController.markPresent);
+router.post('/submitLeaveRequest', userController.submitLeaveRequest);
+router.put('/updateUser', userController.updateUser);
+router.get('/viewAttendance', userController.viewAttendance);
+router.delete('/deleteAttendance', userController.deleteAttendance);
 
 module.exports = router;

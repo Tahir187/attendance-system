@@ -6,10 +6,9 @@ const adminRoutes = require('./routes/adminRoutes');
 const userRoutes = require('./routes/userRoute');
 require('dotenv').config();
 const  initializePassport  = require('./config/passport'); 
-require('./config/db');
 const cors = require('cors');
 
-
+require('./config/db');
 const app = express();
 
 // Middleware
@@ -22,7 +21,7 @@ initializePassport(passport);
 
 // Routes
 app.use('/api/auth', authRoutes);
-app.use('/api/attendance', passport.authenticate('jwt', { session: false }), attendanceRoutes);
+// app.use('/api/attendance', passport.authenticate('jwt', { session: false }), attendanceRoutes);
 app.use('/api/admin', passport.authenticate('jwt', { session: false }), adminRoutes);
 app.use('/api/user', userRoutes);
 // Default route  passport.authenticate('jwt', { session: false }),
