@@ -8,6 +8,5 @@ router.post('/markPresent', userController.markPresent);
 router.post('/submitLeaveRequest', userController.submitLeaveRequest);
 router.put('/updateUser', userController.updateUser);
 router.get('/viewAttendance', userController.viewAttendance);
-router.delete('/deleteAttendance', userController.deleteAttendance);
 
 module.exports = router;

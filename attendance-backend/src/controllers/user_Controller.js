@@ -146,29 +146,6 @@ const userController = {
     }
   },
   
-  deleteAttendance: async (req, res) => {
-    try {
-      const { userId, attendanceId } = req.body;
-
-      // Check if the user exists
-      const user = await User.findById(userId);
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
-
-      // Check if the attendance record exists and if the status is 'present'
-      const attendance = await Attendance.findOne({ _id: attendanceId, "attendance.userId": userId, "attendance.status": "present" });
-      if (!attendance) {
-        return res.status(404).json({ message: "Attendance not found or it cannot be deleted" });
-      }
-
-      // If the attendance record is found and the status is 'present', prevent deletion
-      return res.status(403).json({ message: "Attendance marked present cannot be deleted" });
-    } catch (error) {
-      res.status(500).json({ error: error.message });
-    }
-  },
-
 };
 
 module.exports = userController;
