@@ -145,6 +145,7 @@ const userController = {
       res.status(500).json({ error: error.message });
     }
   },
+  
   deleteAttendance: async (req, res) => {
     try {
       const { userId, attendanceId } = req.body;

@@ -126,6 +126,7 @@ const adminController = {
       res.status(500).json({ error: error.message });
     }
   },
+  
   generateUserReport: async (req, res) => {
     try {
       // Fetch all user data
@@ -146,6 +147,7 @@ const adminController = {
       res.status(500).json({ error: error.message });
     }
   },
+
   generateAttendanceReport: async (req, res) => {
     try {
       // Fetch all attendance data
@@ -164,7 +166,7 @@ const adminController = {
       res.status(500).json({ error: error.message });
     }
   },
-  
+
   manageLeaveRequests: async (req, res) => {
     try {
       // Fetch leave requests from the database
@@ -184,7 +186,6 @@ const adminController = {
     }
   },
 
-  // Function to approve or cancel a leave request
   approveLeaveRequest: async (req, res) => {
     try {
       const { userId, date, approvalStatus } = req.body;
@@ -214,7 +215,6 @@ const adminController = {
     }
   },
 
-  // Function to get counts of leaves, presents, and absents
   getAttendanceCounts: async (req, res) => {
     try {
       const { userId } = req.params;
