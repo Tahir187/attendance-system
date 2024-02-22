@@ -9,14 +9,8 @@ router.post('/register', userAuthController.register);
 // POST route for user login
 router.post('/login', userAuthController.login);
 
-// Mark Present Route
-router.post('/markPresent', auth, userAuthController.markPresent);
-
-// Submit Leave Request Route
-router.post('/submitLeaveRequest', auth, userAuthController.submitLeaveRequest);
-
-// Update User Route
-router.put('/updateUser', auth, userAuthController.updateUser);
-
+router.get('/user',auth ,(req, res)=>{
+    res.status(200).json({message: 'This is user', user: req.user});
+})
 
 module.exports = router;

@@ -18,10 +18,6 @@ const userSchema = mongoose.Schema({
         trim: true,
     },
     profile: {
-        bio: {
-            type: String,
-            default: ''
-        },
         avatar: {
             type:String,
             default: 'https://www.w3schools.com/w3images/avatar2.png'

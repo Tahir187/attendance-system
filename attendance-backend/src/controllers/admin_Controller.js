@@ -43,7 +43,7 @@ const adminController = {
 
   addAttendance: async (req, res) => {
     try {
-      const { userId, date, status } = req.body;
+      const { userId, date, status,leaveAccepted } = req.body;
 
       // Check if the user exists
       const user = await User.findById(userId);
