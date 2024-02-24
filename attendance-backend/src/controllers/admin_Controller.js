@@ -1,7 +1,8 @@
 const User = require("../models/userSchema");
 const Attendance = require("../models/attendanceSchema");
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
+const cloudinary = require('../config/cloudinary')
 
 const adminController = {
   editAttendance: async (req, res) => {
@@ -45,7 +46,7 @@ const adminController = {
 
   addAttendance: async (req, res) => {
     try {
-      const { userId, date, status,leaveAccepted } = req.body;
+      const { userId, date, status, leaveAccepted } = req.body;
 
       // Check if the user exists
       const user = await User.findById(userId);
@@ -98,17 +99,20 @@ const adminController = {
 
   getAttendanceBetweenDates: async (req, res) => {
     try {
+      console.log('body', req.body)
       const { userId, startDate, endDate } = req.body;
-
       // fetch the user's attendance between the specified dates
+      console.log(new Date("2024-02-13").toDateString())
       const attendance = await Attendance.find({
-        date: { $gte: startDate, $lte: endDate },
+        date: { $gte: new Date("2024-02-13").toDateString(), $lte: new Date("2024-02-15").toDateString() },
         "attendance.userId": userId,
       });
 
       res.status(200).json({ attendance });
     } catch (error) {
+      console.log(error)
       res.status(500).json({ error: error.message });
+
     }
   },
 
@@ -126,19 +130,19 @@ const adminController = {
       res.status(500).json({ error: error.message });
     }
   },
-  
+
   generateUserReport: async (req, res) => {
     try {
       // Fetch all user data
-      const users = await User.find({}, 'username email profile role');
+      const users = await User.find({}, "username email profile role");
 
       // Prepare the user report data
-      const userReport = users.map(user => ({
+      const userReport = users.map((user) => ({
         userId: user._id,
         username: user.username,
         email: user.email,
         profile: user.profile,
-        role: user.role
+        role: user.role,
       }));
 
       // Send the user report as response
@@ -151,13 +155,13 @@ const adminController = {
   generateAttendanceReport: async (req, res) => {
     try {
       // Fetch all attendance data
-      const attendanceData = await Attendance.find({}, 'userId date status');
+      const attendanceData = await Attendance.find({}, "userId date status");
 
       // Prepare the attendance report data
-      const attendanceReport = attendanceData.map(entry => ({
+      const attendanceReport = attendanceData.map((entry) => ({
         userId: entry.userId,
         date: entry.date,
-        status: entry.status
+        status: entry.status,
       }));
 
       // Send the attendance report as response
@@ -170,13 +174,16 @@ const adminController = {
   manageLeaveRequests: async (req, res) => {
     try {
       // Fetch leave requests from the database
-      const leaveRequests = await Attendance.find({ 'attendance.status': 'leave', 'attendance.leaveAccepted': false });
+      const leaveRequests = await Attendance.find({
+        "attendance.status": "leave",
+        "attendance.leaveAccepted": false,
+      });
 
       // Prepare the leave requests data to send to the admin
-      const formattedLeaveRequests = leaveRequests.map(request => ({
+      const formattedLeaveRequests = leaveRequests.map((request) => ({
         userId: request.attendance.userId,
         date: request.date,
-        leaveReason: request.attendance.leaveReason
+        leaveReason: request.attendance.leaveReason,
       }));
 
       // Send the leave requests data to the admin
@@ -191,16 +198,19 @@ const adminController = {
       const { userId, date, approvalStatus } = req.body;
 
       // Find the attendance record for the specified user and date
-      const attendanceRecord = await Attendance.findOne({ 'attendance.userId': userId, date });
+      const attendanceRecord = await Attendance.findOne({
+        "attendance.userId": userId,
+        date,
+      });
 
       // Check if the attendance record exists
       if (!attendanceRecord) {
-        return res.status(404).json({ message: 'Attendance record not found' });
+        return res.status(404).json({ message: "Attendance record not found" });
       }
 
       // Update the leaveAccepted field based on the approval status
-      attendanceRecord.attendance.forEach(entry => {
-        if (entry.userId === userId && entry.status === 'leave') {
+      attendanceRecord.attendance.forEach((entry) => {
+        if (entry.userId === userId && entry.status === "leave") {
           entry.leaveAccepted = approvalStatus;
         }
       });
@@ -209,7 +219,7 @@ const adminController = {
       await attendanceRecord.save();
 
       // Send the success message
-      res.status(200).json({ message: 'Leave request updated successfully' });
+      res.status(200).json({ message: "Leave request updated successfully" });
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
@@ -220,7 +230,9 @@ const adminController = {
       const { userId } = req.params;
 
       // Fetch the user's attendance data
-      const userAttendance = await Attendance.find({ 'attendance.userId': userId });
+      const userAttendance = await Attendance.find({
+        "attendance.userId": userId,
+      });
 
       // Initialize counts
       let leaveCount = 0;
@@ -228,14 +240,14 @@ const adminController = {
       let absentCount = 0;
 
       // Count leaves, presents, and absents
-      userAttendance.forEach(entry => {
-        entry.attendance.forEach(record => {
+      userAttendance.forEach((entry) => {
+        entry.attendance.forEach((record) => {
           if (record.userId === userId) {
-            if (record.status === 'leave' && record.leaveAccepted) {
+            if (record.status === "leave" && record.leaveAccepted) {
               leaveCount++;
-            } else if (record.status === 'present') {
+            } else if (record.status === "present") {
               presentCount++;
-            } else if (record.status === 'absent') {
+            } else if (record.status === "absent") {
               absentCount++;
             }
           }
@@ -247,6 +259,38 @@ const adminController = {
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
-  }
+  },
+  // **************************** UPLOAD PROFILE PHOTO *********************************
+  uploadProfilePicture: async (req, res) => {
+    try {
+      if (!req.file.path)
+        return res.status(400).json({ message: "File not selected" });
+      // upload the file on cloudinary
+      const response = await cloudinary.uploader.upload(req.file.path, {
+        resource_type: "auto",
+        folder: "images",
+      });
+      console.log("response", response);
+      // Update the user's profile avatar field with the Cloudinary URL
+      await User.findByIdAndUpdate(req.user._id, {
+        "profile.avatar": response.url + `?${Date.now()}`,
+      });
+
+      // Delete local file on the server
+      fs.unlinkSync(req.file.path);
+
+      // file uploaded successfully
+      return res
+        .status(200)
+        .json({
+          message: "profile image uploaded successfully",
+          img_url: response.url,
+        });
+    } catch (error) {
+      // delete local file on the server
+      fs.unlinkSync(req.file.path);
+      return res.status(404).json({ error: "File deleted from the server" });
+    }
+  },
 };
 module.exports = adminController;

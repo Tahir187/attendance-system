@@ -1,36 +1,37 @@
 // Import necessary modules
-import React, { useState } from 'react';
-import axios from 'axios';
+import React, { useState } from "react";
+import { useDispatch } from "react-redux";
+import { registerUser } from "../../store/authSlice";
+import { Link, useNavigate } from "react-router-dom";
 
 // Define the component for registration
 const Registration = () => {
-  // State variables to store user input
-  const [username, setUsername] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  // Component state variables to store user input
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [role, setRole] = useState([]);
-  const [errorMessage, setErrorMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState("");
 
   // Function to handle form submission
   const handleRegistration = async (e) => {
     e.preventDefault();
     try {
-      // Send registration data to the backend
-      const response = await axios.post('http://localhost:8080/api/auth/register', {
-        username,
-        email,
-        role,
-        password
-      });
-      console.log(response.data);
-      setEmail('');
-      setPassword('');
+      // Dispatch the registerUserAsync action
+      dispatch(registerUser({ username, email, password, role }));
+      // Clear the form fields after successful registration
+      setUsername("");
+      setEmail("");
+      setPassword("");
       setRole([]);
-      setUsername('')
-      // Handle successful registration
+      setErrorMessage("");
+      setTimeout(() => navigate("/login"), 5000);
     } catch (error) {
       // Handle registration error
-      setErrorMessage(error.response.data.message);
+      setErrorMessage(error.message);
     }
   };
 
@@ -41,7 +42,12 @@ const Registration = () => {
         {errorMessage && <p className="text-red-500 mb-4">{errorMessage}</p>}
         <form onSubmit={handleRegistration}>
           <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="username">Username</label>
+            <label
+              className="block text-gray-700 text-sm font-bold mb-2"
+              htmlFor="username"
+            >
+              Username
+            </label>
             <input
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
               id="username"
@@ -53,7 +59,12 @@ const Registration = () => {
             />
           </div>
           <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">Email</label>
+            <label
+              className="block text-gray-700 text-sm font-bold mb-2"
+              htmlFor="email"
+            >
+              Email
+            </label>
             <input
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
               id="email"
@@ -65,7 +76,12 @@ const Registration = () => {
             />
           </div>
           <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">Role</label>
+            <label
+              className="block text-gray-700 text-sm font-bold mb-2"
+              htmlFor="email"
+            >
+              Role
+            </label>
             <input
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
               id="role"
@@ -77,7 +93,12 @@ const Registration = () => {
             />
           </div>
           <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="password">Password</label>
+            <label
+              className="block text-gray-700 text-sm font-bold mb-2"
+              htmlFor="password"
+            >
+              Password
+            </label>
             <input
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
               id="password"
@@ -94,6 +115,12 @@ const Registration = () => {
           >
             Register
           </button>
+          <p className="mt-2">
+            Already have an account?{" "}
+            <Link to="/login" className="text-blue-500">
+              Login here
+            </Link>
+          </p>
         </form>
       </div>
     </div>
