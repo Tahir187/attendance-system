@@ -5,21 +5,30 @@ import {
   BrowserRouter as Router,
   Routes,
   Route,
-  Navigate,
 } from "react-router-dom";
 import AdminDashboard from "./components/Dashboard/AdminDashboard";
 import UserDashboard from "./components/Dashboard/UserDashboard";
 import { useSelector } from "react-redux";
 import ProtectedRoute from "./routes/ProtectedRoutes";
 import UnauthorizedPage from "./components/Dashboard/UnauthorizedPage";
+import EditAttendance from "./pages/Dashboard/AdminPages/EditAttendance";
+import AddAttendance from "./pages/Dashboard/AdminPages/AddAttendance";
+import DeleteAttendance from "./pages/Dashboard/AdminPages/DeleteAttendance";
+import GetAttendanceBetweenDates from "./pages/Dashboard/AdminPages/GetAttendanceBetweenDates";
+import AttendanceCount from "./pages/Dashboard/AdminPages/AttendanceCount";
+import GenerateUserReport from './pages/Dashboard/AdminPages/GenerateUserReport'
+import GenerateAttendanceReport from "./pages/Dashboard/AdminPages/GenerateAttendanceReport";
+import ManageLeaveRequests from "./pages/Dashboard/AdminPages/ManageLeaveRequest";
+import ApproveLeaveRequest from "./pages/Dashboard/AdminPages/ApproveLeaveRequest";
+import MarkPresentPage from "./pages/Dashboard/UserPages/MarkPresent";
+import SubmitLeaveRequest from "./pages/Dashboard/UserPages/SubmitLeaveRequest";
+import ViewAttendance from "./pages/Dashboard/UserPages/ViewAttendance";
+import UpdateUserProfile from "./pages/Dashboard/UserPages/UpdateUserProfile";
 
 function App() {
-  const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
-  const userRole = useSelector((state) => state.auth.role);
 
   return (
     <div className="flex flex-col">
-      <h1>Attendance System</h1>
       <Router>
         <Routes>
           <Route path="/" element={<RegistrationPage />} />
@@ -37,7 +46,88 @@ function App() {
               <ProtectedRoute component={UserDashboard} roles={["user"]} />
             }
           />
-          {/* Other routes */}
+          {/* user protected pages */}
+          <Route
+            path="/userDashboard/mark-present" 
+            element={
+              <ProtectedRoute component={MarkPresentPage} roles={["user"]} /> 
+            }
+          />
+          <Route
+            path="/userDashboard/submit-leave-request" 
+            element={
+              <ProtectedRoute component={SubmitLeaveRequest} roles={["user"]} /> 
+            }
+          />
+          <Route
+            path="/userDashboard/view-attendance" 
+            element={
+              <ProtectedRoute component={ViewAttendance} roles={["user"]} /> 
+            }
+          />
+          <Route
+            path="/userDashboard/update-profile" 
+            element={
+              <ProtectedRoute component={UpdateUserProfile} roles={["user"]} /> 
+            }
+          />
+
+
+          {/* admin protected psages */}
+          <Route
+            path="/adminDashboard/edit-attendance" 
+            element={
+              <ProtectedRoute component={EditAttendance} roles={["admin"]} /> 
+            }
+          />
+          <Route
+            path="/adminDashboard/add-attendance" 
+            element={
+              <ProtectedRoute component={AddAttendance} roles={["admin"]} /> 
+            }
+          />
+          <Route
+            path="/adminDashboard/delete-attendance" 
+            element={
+              <ProtectedRoute component={DeleteAttendance} roles={["admin"]} /> 
+            }
+          />
+          <Route
+            path="/adminDashboard/attendance-between-dates" 
+            element={
+              <ProtectedRoute component={GetAttendanceBetweenDates} roles={["admin"]} /> 
+            }
+          />
+          <Route
+            path="/adminDashboard/attendance-count" 
+            element={
+              <ProtectedRoute component={AttendanceCount} roles={["admin"]} /> 
+            }
+          />
+          <Route
+            path="/adminDashboard/generate-user-report" 
+            element={
+              <ProtectedRoute component={GenerateUserReport} roles={["admin"]} /> 
+            }
+          />
+          <Route
+            path="/adminDashboard/generate-attendance-report" 
+            element={
+              <ProtectedRoute component={GenerateAttendanceReport} roles={["admin"]} /> 
+            }
+          />
+          <Route
+            path="/adminDashboard/manage-leave-request" 
+            element={
+              <ProtectedRoute component={ManageLeaveRequests} roles={["admin"]} /> 
+            }
+          />
+          <Route
+            path="/adminDashboard/approve-leave-request" 
+            element={
+              <ProtectedRoute component={ApproveLeaveRequest} roles={["admin"]} /> 
+            }
+          />
         </Routes>
       </Router>
     </div>

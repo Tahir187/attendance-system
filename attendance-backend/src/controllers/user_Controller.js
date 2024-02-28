@@ -47,7 +47,8 @@ const userController = {
 
   viewAttendance: async (req, res) => {
     try {
-      const { userId } = req.body;
+      // Extract userId from the authenticated user's session or token
+      const userId = req.user.id;
 
       // Check if user exists
       const user = await User.findById(userId);
@@ -65,7 +66,7 @@ const userController = {
       res.status(500).json({ error: error.message });
     }
   },
-
+  
   submitLeaveRequest: async (req, res) => {
     try {
       const { userId, leaveReason } = req.body;

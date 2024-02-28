@@ -1,121 +1,147 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import {
-  markPresent,
-  submitLeaveRequest,
-  updateUserProfile,
-  viewAttendance,
-} from "../api/userApi";
+import { createSlice } from "@reduxjs/toolkit";
+import { markPresent, submitLeaveRequest, updateUserProfile, viewAttendance } from "../api/userApi";
 import { uploadProfile } from "../api/profileApi";
 
 const initialState = {
   loading: false,
   error: null,
+  attendanceRecords: [],
+  leaveRequests: [],
+  userProfile: {},
 };
-
-export const markPresentAsync = createAsyncThunk(
-  "user/markPresent",
-  async (userData, { rejectWithValue }) => {
-    try {
-      await markPresent(userData);
-    } catch (error) {
-      return rejectWithValue(error.message);
-    }
-  }
-);
-
-export const submitLeaveRequestAsync = createAsyncThunk(
-  "user/submitLeaveRequest",
-  async (userData, { rejectWithValue }) => {
-    try {
-      await submitLeaveRequest(userData);
-    } catch (error) {
-      return rejectWithValue(error.message);
-    }
-  }
-);
-
-export const updateUserProfileAsync = createAsyncThunk(
-  "user/updateUserProfile",
-  async (userData, { rejectWithValue }) => {
-    try {
-      await updateUserProfile(userData);
-    } catch (error) {
-      return rejectWithValue(error.message);
-    }
-  }
-);
-
-export const viewAttendanceAsync = createAsyncThunk(
-  "user/viewAttendance",
-  async (userData, { rejectWithValue }) => {
-    try {
-      await viewAttendance(userData);
-    } catch (error) {
-      return rejectWithValue(error.message);
-    }
-  }
-);
-
-export const uploadProfileAsync = createAsyncThunk(
-  "user/uploadProfile",
-  async (formData, { rejectWithValue }) => {
-    try {
-      await uploadProfile(formData);
-    } catch (error) {
-      return rejectWithValue(error.message);
-    }
-  }
-);
 
 const userSlice = createSlice({
   name: "user",
   initialState,
-  extraReducers: (builder) => {
-    builder
-      .addCase(markPresentAsync.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(markPresentAsync.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      })
-      .addCase(submitLeaveRequestAsync.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(submitLeaveRequestAsync.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      })
-      .addCase(updateUserProfileAsync.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(updateUserProfileAsync.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      })
-      .addCase(viewAttendanceAsync.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(viewAttendanceAsync.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      })
-      .addCase(uploadProfileAsync.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(uploadProfileAsync.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      })
-      .addCase(uploadProfileAsync.fulfilled, (state) => {
-        state.loading = false;
-      });
+  reducers: {
+    markPresentStart: (state) => {
+      state.loading = true;
+      state.error = null;
+    },
+    markPresentSuccess: (state, action) => {
+      state.loading = false;
+      state.userProfile.isPresent = action.payload.isPresent;
+    },
+    markPresentFailure: (state, action) => {
+      state.loading = false;
+      state.error = action.payload;
+    },
+    submitLeaveRequestStart: (state) => {
+      state.loading = true;
+      state.error = null;
+    },
+    submitLeaveRequestSuccess: (state, action) => {
+      state.loading = false;
+      state.leaveRequests.push(action.payload.leaveRequest);
+    },
+    submitLeaveRequestFailure: (state, action) => {
+      state.loading = false;
+      state.error = action.payload;
+    },
+    updateUserProfileStart: (state) => {
+      state.loading = true;
+      state.error = null;
+    },
+    updateUserProfileSuccess: (state, action) => {
+      state.loading = false;
+      state.userProfile = action.payload;
+    },
+    updateUserProfileFailure: (state, action) => {
+      state.loading = false;
+      state.error = action.payload;
+    },
+    viewAttendanceStart: (state) => {
+      state.loading = true;
+      state.error = null;
+    },
+    viewAttendanceSuccess: (state, action) => {
+      state.loading = false;
+      state.attendanceRecords = action.payload;
+    },
+    viewAttendanceFailure: (state, action) => {
+      state.loading = false;
+      state.error = action.payload;
+    },
+    uploadProfileStart: (state) => {
+      state.loading = true;
+      state.error = null;
+    },
+    uploadProfileSuccess: (state) => {
+      state.loading = false;
+    },
+    uploadProfileFailure: (state, action) => {
+      state.loading = false;
+      state.error = action.payload;
+    },
   },
 });
+
+export const { 
+  markPresentStart,
+  markPresentSuccess,
+  markPresentFailure,
+  submitLeaveRequestStart,
+  submitLeaveRequestSuccess,
+  submitLeaveRequestFailure,
+  updateUserProfileStart,
+  updateUserProfileSuccess,
+  updateUserProfileFailure,
+  viewAttendanceStart,
+  viewAttendanceSuccess,
+  viewAttendanceFailure,
+  uploadProfileStart,
+  uploadProfileSuccess,
+  uploadProfileFailure
+} = userSlice.actions;
+
+export const markPresentAction = (attendanceData) => async (dispatch) => {
+  try {
+    dispatch(markPresentStart());
+    const response = await markPresent(attendanceData);
+    dispatch(markPresentSuccess(response));
+  } catch (error) {
+    dispatch(markPresentFailure(error.message));
+  }
+};
+
+export const submitLeaveRequestAction = (leaveRequestData) => async (dispatch) => {
+  try {
+    dispatch(submitLeaveRequestStart());
+    const response = await submitLeaveRequest(leaveRequestData);
+    dispatch(submitLeaveRequestSuccess(response));
+  } catch (error) {
+    dispatch(submitLeaveRequestFailure(error.message));
+  }
+};
+
+export const updateUserProfileAction = (userData) => async (dispatch) => {
+  try {
+    dispatch(updateUserProfileStart());
+    const response = await updateUserProfile(userData);
+    dispatch(updateUserProfileSuccess(response));
+  } catch (error) {
+    dispatch(updateUserProfileFailure(error.message));
+  }
+};
+
+export const viewAttendanceAction = (userId) => async (dispatch) => {
+  try {
+    dispatch(viewAttendanceStart());
+    const response = await viewAttendance(userId);
+    dispatch(viewAttendanceSuccess(response));
+  } catch (error) {
+    dispatch(viewAttendanceFailure(error.message));
+  }
+};
+
+export const uploadProfileAction = (formData) => async (dispatch) => {
+  try {
+    dispatch(uploadProfileStart());
+    await uploadProfile(formData);
+    dispatch(uploadProfileSuccess());
+  } catch (error) {
+    dispatch(uploadProfileFailure(error.message));
+  }
+};
 
 export default userSlice.reducer;

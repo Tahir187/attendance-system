@@ -1,3 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.btn{
+    @apply shadow-md p-3 bg-gray-300 rounded-lg font-semibold capitalize w-full text-center
+}

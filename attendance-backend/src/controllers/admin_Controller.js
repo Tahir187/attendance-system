@@ -2,9 +2,24 @@ const User = require("../models/userSchema");
 const Attendance = require("../models/attendanceSchema");
 const fs = require("fs");
 const path = require("path");
-const cloudinary = require('../config/cloudinary')
+const cloudinary = require("../config/cloudinary");
 
 const adminController = {
+  getUserAttendanceRecords: async (req, res) => {
+    try {
+      const { userId } = req.params;
+
+      // Fetch all attendance records for the specified user
+      const attendanceRecords = await Attendance.find({
+        "attendance.userId": userId,
+      }).sort({ date: -1 }); // Sort by date in descending order
+
+      res.status(200).json({ attendanceRecords });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  },
+
   editAttendance: async (req, res) => {
     try {
       const { userId, date, status, leaveAccepted } = req.body;
@@ -31,7 +46,7 @@ const adminController = {
         userAttendance.leaveAccepted = leaveAccepted;
       } else {
         attendance.attendance.push({
-          userId: userId,
+          userName: userName,
           status: status,
           leaveAccepted: leaveAccepted,
         });
@@ -47,9 +62,9 @@ const adminController = {
   addAttendance: async (req, res) => {
     try {
       const { userId, date, status, leaveAccepted } = req.body;
-
+      console.log('user date', req.body)
       // Check if the user exists
-      const user = await User.findById(userId);
+      const user = await User.findById({_id:userId});
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
@@ -99,20 +114,22 @@ const adminController = {
 
   getAttendanceBetweenDates: async (req, res) => {
     try {
-      console.log('body', req.body)
+      console.log("body", req.body);
       const { userId, startDate, endDate } = req.body;
       // fetch the user's attendance between the specified dates
-      console.log(new Date("2024-02-13").toDateString())
+      console.log(new Date("2024-02-13").toDateString());
       const attendance = await Attendance.find({
-        date: { $gte: new Date("2024-02-13").toDateString(), $lte: new Date("2024-02-15").toDateString() },
+        date: {
+          $gte: new Date(startDate).toDateString(),
+          $lte: new Date(endDate).toDateString(),
+        },
         "attendance.userId": userId,
       });
 
       res.status(200).json({ attendance });
     } catch (error) {
-      console.log(error)
+      console.log(error);
       res.status(500).json({ error: error.message });
-
     }
   },
 
@@ -134,7 +151,11 @@ const adminController = {
   generateUserReport: async (req, res) => {
     try {
       // Fetch all user data
-      const users = await User.find({}, "username email profile role");
+      const { userId, username, email, profile, role } = req.body;
+      const users = await User.find(
+        {},
+        `userId, username, email, profile, role`
+      );
 
       // Prepare the user report data
       const userReport = users.map((user) => ({
@@ -173,22 +194,60 @@ const adminController = {
 
   manageLeaveRequests: async (req, res) => {
     try {
-      // Fetch leave requests from the database
+      const { userId } = req.body;
+
       const leaveRequests = await Attendance.find({
         "attendance.status": "leave",
         "attendance.leaveAccepted": false,
+        "attendance.userId": userId,
       });
 
-      // Prepare the leave requests data to send to the admin
       const formattedLeaveRequests = leaveRequests.map((request) => ({
         userId: request.attendance.userId,
         date: request.date,
         leaveReason: request.attendance.leaveReason,
       }));
 
-      // Send the leave requests data to the admin
       res.status(200).json({ leaveRequests: formattedLeaveRequests });
     } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  },
+
+  getLeaveRequests: async (req, res) => {
+    try {
+      // Extract filtering options from request body (optional)
+      const { userId, status, startDate, endDate } = req.body || {};
+
+      // Construct query for efficient retrieval
+      const query = {
+        "attendance.status": status ? status : "leave",
+      };
+
+      // Apply additional filters if provided
+      if (userId) query.attendance.userId = userId;
+      if (startDate) query.date = { $gte: new Date(startDate).toDateString() };
+      if (endDate) query.date = { $lte: new Date(endDate).toDateString() };
+
+      // Fetch leave requests from Attendance model
+      const leaveRequests = await Attendance.find(query)
+        .populate("attendance.userId", "username name") // Populate user info
+        .select("date attendance -_id"); 
+
+      // Format response for clarity
+      const formattedLeaveRequests = leaveRequests.map((request) => ({
+        userId: request.attendance.userId._id,
+        username: request.attendance.userId.username,
+        name: request.attendance.userId.name,
+        date: request.date,
+        status: request.attendance.status,
+        leaveReason: request.attendance.leaveReason,
+        leaveAccepted: request.attendance.leaveAccepted,
+      }));
+
+      res.status(200).json({ leaveRequests: formattedLeaveRequests });
+    } catch (error) {
+      console.error(error);
       res.status(500).json({ error: error.message });
     }
   },
@@ -280,12 +339,10 @@ const adminController = {
       fs.unlinkSync(req.file.path);
 
       // file uploaded successfully
-      return res
-        .status(200)
-        .json({
-          message: "profile image uploaded successfully",
-          img_url: response.url,
-        });
+      return res.status(200).json({
+        message: "profile image uploaded successfully",
+        img_url: response.url,
+      });
     } catch (error) {
       // delete local file on the server
       fs.unlinkSync(req.file.path);

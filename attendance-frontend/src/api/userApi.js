@@ -1,13 +1,14 @@
-import axios from 'axios';
+import axiosApi from './axios'; 
 
-const baseURL = 'http://localhost:8080/api/user/';
+const baseURL = "http://localhost:8080/api/user/";
 
-const userApi = axios.create({
+export const userApi = axiosApi.create({
   baseURL,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
 });
+
 
 export const markPresent = async (attendanceData) => {
   try {
@@ -44,7 +45,5 @@ export const viewAttendance = async (userId, userData) => {
     throw new Error(error.response.data.message);
   }
 };
-
-// Add other user-related API functions as needed
 
 export default userApi;

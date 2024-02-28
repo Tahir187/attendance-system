@@ -36,7 +36,8 @@ const Registration = () => {
   };
 
   return (
-    <div className="flex justify-center items-center h-screen ">
+    <div className="flex justify-center items-center h-screen flex-col">
+      <h1 className="text-3xl text-center mt-10 font-bold uppercase">Attendance System</h1>
       <div className="bg-gray-200 p-8 rounded-lg shadow-lg">
         <h2 className="text-2xl font-bold mb-4">Registration</h2>
         {errorMessage && <p className="text-red-500 mb-4">{errorMessage}</p>}

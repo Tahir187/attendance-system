@@ -7,7 +7,7 @@ const Login = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
-  const userRole = useSelector((state) => state.auth.role[0]);
+  const userRole = useSelector((state) => state.auth.role?.[0]);
 
   // Component state variables to store user input
   const [email, setEmail] = useState("");
@@ -46,7 +46,9 @@ const Login = () => {
   };
 
   return (
-    <div className="flex justify-center items-center h-screen ">
+    <div className="flex justify-center items-center h-screen flex-col">
+      <h1 className="text-3xl text-center mt-10 font-bold uppercase">Attendance System</h1>
+
       <div className="bg-gray-200 p-8 rounded-lg shadow-lg">
         <h2 className="text-2xl font-bold mb-4">Login</h2>
         {errorMessage && <p className="text-red-500 mb-4">{errorMessage}</p>}
@@ -96,7 +98,7 @@ const Login = () => {
 
         <p className="mt-2">
           If you are a new user, please{" "}
-          <Link to="/register" className="text-blue-500">
+          <Link to="/" className="text-blue-500">
             Register
           </Link>
           .

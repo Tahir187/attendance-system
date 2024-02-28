@@ -1,77 +1,79 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { login, register } from '../api/authApi';
+import { createSlice } from "@reduxjs/toolkit";
+import { login, register } from "../api/authApi";
+import { getUsers } from "../api/getUsersApi";
 
 const initialState = {
   user: null,
+  users: [],
   isLoggedIn: false,
   role: [],
   loading: false,
   error: null,
 };
 
-export const loginUser = createAsyncThunk('auth/loginUser', async (userData, { rejectWithValue }) => {
-  try {
-    const response = await login(userData);
-    return response.user;
-  } catch (error) {
-    return rejectWithValue(error.message);
-  }
-});
-
-export const registerUser = createAsyncThunk('auth/registerUser', async (userData, { rejectWithValue }) => {
-  try {
-    const response = await register(userData);
-    return response.user;
-  } catch (error) {
-    return rejectWithValue(error.message);
-  }
-});
-
 const authSlice = createSlice({
-  name: 'auth',
+  name: "auth",
   initialState,
   reducers: {
+    setUser(state, action) {
+      state.user = action.payload;
+      state.isLoggedIn = true;
+      state.role = action.payload.role; 
+    },
     logoutUser(state) {
       state.user = null;
       state.isLoggedIn = false;
       state.role = null;
     },
-  },
-  extraReducers: (builder) => {
-    builder
-      .addCase(loginUser.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(loginUser.fulfilled, (state, action) => {
-        state.loading = false;
-        state.user = action.payload;
-        state.isLoggedIn = true;
-        state.role = action.payload.role; // Assuming role is included in the login response
-        state.error = null;
-      })
-      .addCase(loginUser.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      })
-      .addCase(registerUser.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(registerUser.fulfilled, (state, action) => {
-        state.loading = false;
-        state.user = action.payload;
-        state.isLoggedIn = true;
-        state.role = action.payload.role; // Assuming role is included in the register response
-        state.error = null;
-      })
-      .addCase(registerUser.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      });
+    setError(state, action) {
+      state.error = action.payload;
+    },
+    setLoading(state, action) {
+      state.loading = action.payload;
+    },
+    setUsers(state, action) {
+      state.users = action.payload;
+    },
   },
 });
 
-export const { logoutUser } = authSlice.actions;
+export const { setUser, logoutUser, setError, setLoading, setUsers } = authSlice.actions;
+
+export const loginUser = (userData) => async (dispatch) => {
+  try {
+    dispatch(setLoading(true));
+    const response = await login(userData);
+    dispatch(setUser(response.user));
+  } catch (error) {
+    dispatch(setError(error.message));
+  } finally {
+    dispatch(setLoading(false));
+  }
+};
+
+export const registerUser = (userData) => async (dispatch) => {
+  try {
+    dispatch(setLoading(true));
+    const response = await register(userData);
+    dispatch(setUser(response.user));
+  } catch (error) {
+    dispatch(setError(error.message));
+  } finally {
+    dispatch(setLoading(false));
+  }
+};
+
+export const fetchUsers = () => async (dispatch) => {
+  try {
+    dispatch(setLoading(true));
+    const response = await getUsers();
+    dispatch(setUsers(response.users));
+  } catch (error) {
+    dispatch(setError(error.message));
+  } finally {
+    dispatch(setLoading(false));
+  }
+};
 
 export default authSlice.reducer;
+

@@ -1,13 +1,22 @@
-import axios from "axios";
+import axiosApi from './axios'; 
+const baseURL = 'http://localhost:8080/api/admin'; 
 
-const baseURL = "http://localhost:8080/api/admin/";
-
-const adminApi = axios.create({
+export const adminApi = axiosApi.create({
   baseURL,
   headers: {
     "Content-Type": "application/json",
   },
 });
+
+
+export const getUserAttendanceRecords = async (userId) => {
+  try {
+    const response = await adminApi.get(`/attendance/${userId}`);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response.data.message);
+  }
+};
 
 export const editAttendance = async (attendanceId, attendanceData) => {
   try {
@@ -21,14 +30,20 @@ export const editAttendance = async (attendanceId, attendanceData) => {
   }
 };
 
+
 export const addAttendance = async (attendanceData) => {
+
   try {
-    const response = await adminApi.post("/addAttendance", attendanceData);
+    const response = await adminApi.post('/addAttendance', attendanceData);
     return response.data;
   } catch (error) {
-    throw new Error(error.response.data.message);
+    console.error("Error adding attendance:", error); 
+
+   
   }
 };
+
+
 
 export const deleteAttendance = async (attendanceId) => {
   try {
@@ -64,6 +79,7 @@ export const generateUserReport = async (fromDate, toDate) => {
     const response = await adminApi.get(
       `/generateUserReport?fromDate=${fromDate}&toDate=${toDate}`
     );
+    console.log("api for generate user", response);
     return response.data;
   } catch (error) {
     throw new Error(error.response.data.message);
@@ -83,13 +99,10 @@ export const generateAttendanceReport = async (fromDate, toDate) => {
 
 export const manageLeaveRequests = async (requestData) => {
   try {
-      // Send a POST request to the manage leave requests endpoint
       const response = await axios.post('/leaveRequests', requestData);
 
-      // Return the response data
       return response.data;
   } catch (error) {
-      // If an error occurs, throw it so it can be caught and handled by the caller
       throw error;
   }
 };
@@ -122,7 +135,3 @@ export const getAttendanceCounts = async (userId) => {
     throw new Error(error.response.data.message);
   }
 };
-
-// Add other admin-related API functions as needed
-
-export default adminApi;

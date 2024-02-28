@@ -1,23 +1,30 @@
 const express = require('express');
 const passport = require('passport');
 const authRoutes = require('./routes/authRoutes');
-const attendanceRoutes = require('./routes/attendanceRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const userRoutes = require('./routes/userRoute');
 const profileRoutes = require('./routes/profileRoutes')
+const getUsersRoute = require('./routes/getUsersRoute');
+
 
 require('dotenv').config();
 const  initializePassport  = require('./config/passport'); 
 const cors = require('cors');
 const path = require('path');
 
+const corsOptions ={
+    origin:'http://localhost:5173',     
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials:true,           
+    optionSuccessStatus:200
+}
 
 require('./config/db');
 const app = express();
 
 // Middleware
 app.use(express.json());
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(passport.initialize());
 app.use(express.static(path.join(__dirname, 'uploads')));
 
@@ -27,14 +34,13 @@ initializePassport(passport);
 
 // Routes
 app.use('/api/auth', authRoutes);
-// app.use('/api/attendance', passport.authenticate('jwt', { session: false }), attendanceRoutes);
 app.use('/api/admin', passport.authenticate('jwt', { session: false }), adminRoutes);
-app.use('/api/profile',passport.authenticate('jwt', {session:false}),profileRoutes)
-
+app.use('/api/profile',profileRoutes ,passport.authenticate('jwt', {session:false}))
+app.use('/api/getUsers', getUsersRoute); 
 app.use('/api/user', userRoutes);
-// Default route  passport.authenticate('jwt', { session: false }),
+
 app.get('/api',  (req, res) => {
-    res.send('Homepage');
+    res.send('Homepage'); 
 });
 
 // Root redirect
